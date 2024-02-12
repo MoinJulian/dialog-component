@@ -1,11 +1,12 @@
 <script lang="ts">
-	import Header from "./lib/Header.svelte";
-	import Items from "./lib/Items.svelte";
-	import Menu from "./lib/Menu.svelte";
-	import { type Item } from "./lib/types";
-	import { shuffle } from "./lib/utils";
+	import Dialog, { open_dialog } from "./lib/Dialog.svelte"
+	import Header from "./lib/Header.svelte"
+	import Items from "./lib/Items.svelte"
+	import Menu from "./lib/Menu.svelte"
+	import { type Item } from "./lib/types"
+	import { shuffle } from "./lib/utils"
 
-	const AMOUNT = 12
+	const AMOUNT = 2
 
 	const original_items = Array.from({ length: AMOUNT }).map((_, i) => ({
 		source: `https://unsplash.it/${300 + i}/200`,
@@ -15,8 +16,14 @@
 	let items: Item[] = original_items
 
 	function confirm_delete_item(item: Item) {
-		const confirm = window.confirm("Do you really want to delete the item?")
-		if (confirm) delete_item(item)
+		open_dialog({
+			text: "Do you really want to delete the item?",
+			modal: true,
+			confirm: {
+				text: "Yes",
+				action: () => delete_item(item),
+			}
+		})
 	}
 
 	function delete_item(item: Item) {
@@ -25,10 +32,17 @@
 	}
 
 	function open_shuffle_modal() {
-		const confirm = window.confirm(
-			"This will shuffle the items in a random order.",
-		)
-		if (confirm) shuffle_items()
+		open_dialog({
+			text: "This will shuffle the items in a random order.",
+			modal: true,
+			confirm: {
+				text: "Ok", action: shuffle_items
+			},
+			cancel: {
+				text: "Cancel",
+				action: () => {},
+			}
+		})
 	}
 
 	function shuffle_items() {
@@ -36,14 +50,24 @@
 	}
 
 	function confirm_create_items() {
-		const confirm = window.confirm(
-			"There are no items left. Do you want to create new items?",
-		)
-		if (confirm) items = original_items
+		open_dialog({
+			text: "There are no items left. Do you want to create new items?",
+			confirm: {
+				text: "Sure", action: () => items = original_items
+			},
+			cancel: {
+				text: "No thanks", action: () => {}
+			},
+			modal: false
+		})
 	}
 
 	function alert_rotate() {
-		window.alert("This feature is not implemented yet")
+		open_dialog({
+			text: "This feature is not implemented yet",
+			modal: false,
+			cancel: null,
+		})
 	}
 </script>
 
@@ -54,3 +78,5 @@
 
 	<Items {items} {confirm_delete_item} />
 </main>
+
+<Dialog></Dialog>
